@@ -12,3 +12,6 @@ suites:
   - name: default
     run_list:
       - recipe[wombat-oam::default]
+    attributes:
+      wombat_oam:
+        otp_name: wombat@127.0.0.1

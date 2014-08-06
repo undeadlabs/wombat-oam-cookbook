@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export HOME=<%= node[:wombat_oam][:_release_path] %>
-cd <%= node[:wombat_oam][:_release_path] %>/rel/wombat/wombat
+export HOME=<%= node[:wombat_oam][:_srcpath] %>
+cd <%= node[:wombat_oam][:_relpath] %>
 
 exec 2>&1
 exec <%= node[:runit][:chpst_bin] %> \

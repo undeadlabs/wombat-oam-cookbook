@@ -39,9 +39,18 @@ libarchive_file File.basename(asset.path) do
 end
 
 execute "generate-release" do
-  cwd node[:wombat_oam][:_release_path]
+  cwd node[:wombat_oam][:_srcpath]
   command "./generate.sh"
-  not_if { File.exist?("#{node[:wombat_oam][:_release_path]}/rel/wombat/wombat/bin") }
+  not_if { File.exist?("#{node[:wombat_oam][:_relpath]}/bin") }
+end
+
+template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]}/vm.args" do
+  source "vm.args.erb"
+  owner node[:wombat_oam][:owner]
+  group node[:wombat_oam][:group]
+  mode 0644
+
+  notifies :restart, "runit_service[wombat-oam]"
 end
 
 runit_service "wombat-oam" do
