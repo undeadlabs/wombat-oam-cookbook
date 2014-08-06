@@ -17,7 +17,15 @@ group node[:wombat_oam][:group]
 
 user node[:wombat_oam][:owner] do
   group node[:wombat_oam][:group]
+  home node[:wombat_oam][:home]
   system true
+end
+
+directory node[:wombat_oam][:home] do
+  owner node[:wombat_oam][:owner]
+  group node[:wombat_oam][:group]
+  mode 0755
+  recursive true
 end
 
 directory node[:wombat_oam][:log_dir] do
@@ -41,6 +49,8 @@ end
 execute "generate-release" do
   cwd node[:wombat_oam][:_srcpath]
   command "./generate.sh"
+  user node[:wombat_oam][:owner]
+  group node[:wombat_oam][:group]
   not_if { File.exist?("#{node[:wombat_oam][:_relpath]}/bin") }
 end
 
@@ -53,8 +63,8 @@ template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]
   notifies :restart, "runit_service[wombat-oam]"
 end
 
-template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]}/sys.config" do
-  source "sys.config.erb"
+template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]}/user.config" do
+  source "user.config.erb"
   owner node[:wombat_oam][:owner]
   group node[:wombat_oam][:group]
   mode 0644

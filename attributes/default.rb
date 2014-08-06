@@ -16,6 +16,7 @@ default[:wombat_oam][:install_path]  = "/opt/wombat-oam"
 default[:wombat_oam][:log_dir]       = "/var/log/wombat-oam"
 default[:wombat_oam][:erlang_cookie] = "wombat"
 default[:wombat_oam][:otp_name]      = "wombat@#{node[:fqdn]}"
+default[:wombat_oam][:home]          = "/home/wombat"
 
 #
 # Private
