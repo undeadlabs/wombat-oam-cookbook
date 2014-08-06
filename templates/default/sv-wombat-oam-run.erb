@@ -5,5 +5,5 @@ cd <%= node[:wombat_oam][:_release_path] %>/rel/wombat/wombat
 
 exec 2>&1
 exec <%= node[:runit][:chpst_bin] %> \
-      -u <%= node[:wombat_oam][:user] %>:<%= node[:wombat_oam][:group] %> \
+      -u <%= node[:wombat_oam][:owner] %>:<%= node[:wombat_oam][:group] %> \
       bin/wombat foreground

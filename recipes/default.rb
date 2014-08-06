@@ -15,7 +15,7 @@ include_recipe "runit::default"
 
 group node[:wombat_oam][:group]
 
-user node[:wombat_oam][:user] do
+user node[:wombat_oam][:owner] do
   group node[:wombat_oam][:group]
   system true
 end
@@ -34,7 +34,7 @@ end
 libarchive_file File.basename(asset.path) do
   path asset.path
   extract_to node[:wombat_oam][:install_path]
-  owner node[:wombat_oam][:user]
+  owner node[:wombat_oam][:owner]
   group node[:wombat_oam][:group]
 end
 
