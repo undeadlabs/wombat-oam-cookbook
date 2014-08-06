@@ -53,6 +53,15 @@ template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]
   notifies :restart, "runit_service[wombat-oam]"
 end
 
+template "#{node[:wombat_oam][:_relpath]}/releases/#{node[:wombat_oam][:version]}/sys.config" do
+  source "sys.config.erb"
+  owner node[:wombat_oam][:owner]
+  group node[:wombat_oam][:group]
+  mode 0644
+
+  notifies :restart, "runit_service[wombat-oam]"
+end
+
 runit_service "wombat-oam" do
   action :enable
 end

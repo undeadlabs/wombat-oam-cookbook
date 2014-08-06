@@ -1,0 +1,197 @@
+%% -*- erlang -*-
+[
+
+    %% WombatOAM Dashboard config
+    {wo_dashboard, [
+                    {enable_topo_graph, true},
+                    {enable_popups, true},
+                    {enable_force_ssl, false}
+                   ]},
+
+    %% Wombat HTTP interface configuration
+    {wo_rest, [
+        %% HTTP port for REST API and Wombat dashboard
+        {http_port, <%= node[:wombat_oam][:wo_rest][:port] %>}
+    ]},
+
+    %% Wombat Topology configuration
+    {wo_core, [
+               {node_monitor_max_wait, 30000}
+              ]},
+
+    %% Wombat metrics configuration
+    {wo_metrics, [
+                  % Which backend metrics plugin will use to store metrics.
+                  % It can be mnesia or seq_file
+               {backend, mnesia},
+               {sampling, [
+                     % The format of the retention rules is the similar to the
+                     % one used by Graphite. E.g. "1m:1h" means that that each
+                     % datapoint represents 1 minute, and we want to keep
+                     % enough datapoints so that they add up to 1 hour of data.
+                     %
+                     % We have a restrictions though, because the web interface
+                     % uses the metrics stored in the first retention period to
+                     % serve the "last hour" graphs, the second period to serve
+                     % the "last day" graphs, and the third period to serve the
+                     % "last week" graph. So e.g. if you set the second period
+                     % to keep only the last 12 hours, then the first part of
+                     % the "last day" graph will be always empty.
+                     %
+                     % But you can freely modify the data frequency (e.g. the
+                     % number before the colons).
+
+                     % These are metric groups. All metrics in these groups will
+                     % be handled with these retention settings, except those
+                     % mentioned below.
+                     {wombat_metrics,       "1m:1h 5m:12h 15m:2d"},
+                     {folsom_metrics,       "1m:1h 5m:12h 15m:2d"},
+                     {exometer_metrics,     "1m:1h 5m:12h 15m:2d"},
+
+                     % These are individual metrics. They are also all part of a
+                     % metric group, but since they are mentioned here
+                     % explicitly, they will be collected individually, using
+                     % the retention rates specified here.
+                     {total_memory,         "1m:1h 5m:12h 15m:2d"},
+                     {process_memory,       "1m:1h 5m:12h 15m:2d"}
+               ]},
+               {gauges, [
+                     {total_memory,
+                      [{range,
+                        [{"{{node}}", {0, 1500000000}}, % 100MB
+                         {"riak.*", {0, 200000000}}, % 200MB
+                         {".*", {10000000, 30000000}}]}]}, % 10-30MB
+                     {cpu_avg1,
+                      [{range,
+                        [{"{{node}}", {0, 5}},
+                         {"riak.*", {0, 2}}]}]},
+                     {cpu_avg5,
+                      [{range,
+                        [{"{{node}}", {0, 5}},
+                         {"riak.*", {0, 2}}]}]},
+                     {cpu_avg15,
+                      [{range,
+                        [{"{{node}}", {0, 5}},
+                         {"riak.*", {0, 2}}]}]},
+                     { {riak_core, handoff_timeouts},
+                      [{range,
+                        [{"riak.*", {0, 10}}]}]}
+               ]}
+               %{graphite, [
+               %      {carbon_host, "localhost"},
+               %      {carbon_udp_port, 2003}
+               %]}
+    ]},
+
+    %% Wombat Alarms configuration
+    {wo_alarms, [
+        {repeat_notifications, true},
+        {interval, 10000},
+        {node_info_opts, [
+            {app_version_alarms, true},
+            {module_version_alarms, true},
+            {trace_modules, true},
+          {mod_version_interval, 20000},
+            {time_diff_alarms, true}
+        ]},
+        {system_checks, [
+            {process_limit,         [{minor, 80}, {major, 90}]},
+            {port_limit,            [{minor, 80}, {major, 90}]},
+            {ets_limit,             [{minor, 80}, {major, 90}]},
+            {atom_limit,            [{minor, 80}, {major, 90}]},
+            {module_limit,          [{minor, 80}, {major, 90}]},
+            {export_limit,          [{minor, 80}, {major, 90}]},
+            {memory_limit,          [{minor, 70}, {major, 75}]},
+            {open_file_limit,       [{minor, 60}, {major, 90}]},
+            {open_socket_limit,     [{minor, 60}, {major, 75}]},
+            {disk_utilization,      [{minor, 60}, {major, 75}]},
+            {os_cpu_load,           [{minor, 75}, {major, 90}]},
+            {disk_capacity,         [{minor, 80}, {major, 90}]},
+
+            %% the thresholds are special as they are not percentages here
+            {shell_history_size,    [{minor, 20000000}, {major, 100000000}]},
+            {process_message_queue, [{minor, 10000}, {major, 100000}]},
+
+            %% following alarms don't have limits
+            {old_code, minor},
+
+            {system_information, major}
+        ]}
+    ]},
+
+    %% kernel config
+    {kernel, [
+              {start_timer, true},
+              {inet_dist_listen_min, {{dist_listen_min}} },
+              {inet_dist_listen_max, {{dist_listen_max}} },
+              {permissions, [{snmp, false}, {wo_core_mm, false}]}
+    ]},
+
+    %% Mnesia configuration
+    {mnesia, [
+              {dir, "data/{{node}}/mnesia"},
+              {dc_dump_limit, 40},
+              {dump_log_write_threshold, 10000}
+    ]},
+
+    %% SASL config
+    {sasl, [
+            {sasl_error_logger, {file, "log/{{node}}/sasl-error.log"}},
+            {errlog_type, error},
+            {error_logger_mf_dir, "log/{{node}}/sasl"}, % Log directory
+            {error_logger_mf_maxbytes, 10485760},       % 10 MB max file size
+            {error_logger_mf_maxfiles, 5}               % 5 files max
+           ]},
+
+    %% Lager config
+    {lager, [
+             {handlers, [
+                 {lager_file_backend, [
+                     {file, "log/{{node}}/wombat.log"},
+                     {level, info},
+                     {size, 10485760}, % 10 MB
+                     {date, ""}, % don't wrap around based on dates
+                     {formatter, lager_default_formatter},
+                     {formatter_config,
+                      [date, " ", time, " [", severity, "] ",
+                       pid, " ",
+                       {module,
+                        [ "[", module, {line, [":", line], ""}, "] " ],
+                        ""},
+                       message, "\n"]}
+                     ]},
+                 {lager_file_backend, [
+                     {file, "log/{{node}}/debug.log"},
+                     {level, debug},
+                     {size, 10485760}, % 10 MB
+                     {date, ""}, % don't wrap around based on dates
+                     {formatter, lager_default_formatter},
+                     {formatter_config,
+                      [date, " ", time, " [", severity, "] ",
+                       pid, " ",
+                       {module,
+                        [ "[", module, {line, [":", line], ""}, "] " ],
+                        ""},
+                       message, "\n"]}
+                     ]}
+                 ]},
+             {crash_log, "log/{{node}}/crash.log"}
+            ]},
+
+    %% Elarm config
+    {elarm, [
+          {servers, []},
+          {alarmlist_cb, wo_elarm_alarmlist},
+          {log_cb, wo_elarm_log}
+         ]},
+
+    %% SNMP config
+    {snmp,
+     [{agent,
+       [{config, [{dir, "data/{{node}}/snmp/config"}]},
+        {db_dir, "data/{{node}}/snmp/db"},
+        {db_init_error, create},
+        {multi_threaded, true}
+       ]}
+     ]}
+].
