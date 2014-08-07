@@ -2,5 +2,10 @@
 [
   {wo_rest, [
     {http_port, <%= node[:wombat_oam][:wo_rest][:port] %>}
+  ]},
+
+  {kernel, [
+    {inet_dist_listen_min, <%= node[:wombat_oam][:kernel][:inet_dist_listen_min] %>},
+    {inet_dist_listen_max, <%= node[:wombat_oam][:kernel][:inet_dist_listen_max] %>}
   ]}
 ].
