@@ -7,7 +7,12 @@
 # Copyright (c) 2014 Undead Labs, LLC
 #
 
-node.normal[:erlang][:esl][:version] = "1:17.1"
+case node['platform_family']
+  when 'debian'
+    node.normal[:erlang][:esl][:version] = "1:17.3.2"
+  when 'rhel'
+    node.normal[:erlang][:esl][:version] = "17.3-1.el6"
+end
 
 include_recipe "libarchive::default"
 include_recipe "erlang::esl"
