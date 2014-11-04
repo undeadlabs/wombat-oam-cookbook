@@ -4,7 +4,7 @@ maintainer_email "jamie@undeadlabs.com"
 license          "MIT"
 description      "Installs/Configures wombat-oam"
 long_description "Installs/Configures wombat-oam"
-version          "0.1.0"
+version          "0.1.1"
 
 supports "ubuntu"
 
