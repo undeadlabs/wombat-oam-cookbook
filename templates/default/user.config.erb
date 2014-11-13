@@ -1,7 +1,12 @@
 %% -*- erlang -*-
 [
   {wo_rest, [
-    {http_port, <%= node[:wombat_oam][:wo_rest][:port] %>}
+    {http_port, <%= node[:wombat_oam][:wo_rest][:port] %>},
+    {enable_authentication, false}
+  ]},
+
+  {wo_dashboard, [
+    {enable_force_ssl, false}
   ]},
 
   {kernel, [

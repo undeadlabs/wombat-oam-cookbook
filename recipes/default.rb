@@ -8,4 +8,3 @@
 #
 
 include_recipe "wombat-oam::app"
-include_recipe "wombat-oam::app_proxy"
