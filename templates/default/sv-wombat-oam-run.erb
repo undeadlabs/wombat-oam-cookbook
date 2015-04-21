@@ -1,0 +1,9 @@
+#!/bin/sh
+
+export HOME=<%= node[:wombat_oam][:home] %>
+cd <%= node[:wombat_oam][:_relpath] %>
+
+exec 2>&1
+exec <%= node[:runit][:chpst_bin] %> \
+      -u <%= node[:wombat_oam][:owner] %>:<%= node[:wombat_oam][:group] %> \
+      bin/wombat foreground -config releases/<%= node[:wombat_oam][:version] %>/user.config

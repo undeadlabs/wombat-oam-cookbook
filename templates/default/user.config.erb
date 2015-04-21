@@ -1,0 +1,16 @@
+%% -*- erlang -*-
+[
+  {wo_rest, [
+    {http_port, <%= node[:wombat_oam][:wo_rest][:port] %>},
+    {enable_authentication, false}
+  ]},
+
+  {wo_dashboard, [
+    {enable_force_ssl, false}
+  ]},
+
+  {kernel, [
+    {inet_dist_listen_min, <%= node[:wombat_oam][:kernel][:inet_dist_listen_min] %>},
+    {inet_dist_listen_max, <%= node[:wombat_oam][:kernel][:inet_dist_listen_max] %>}
+  ]}
+].
